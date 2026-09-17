@@ -19,4 +19,4 @@ Methodology-focused notes from hands-on security practice — CTF-style wargames
 
 ## Note on spoilers
 
-HackTheBox's terms prohibit publishing full walkthroughs for active machines. All writeups here — HTB included — stick to methodology (tools used, reasoning, what was learned) rather than step-by-step spoiler solutions. Passwords/flags are omitted throughout since they're player-specific and not the point.
+HackTheBox's terms prohibit publishing full walkthroughs for active machines. All writeups here - HTB included - stick to methodology (tools used, reasoning, what was learned) rather than step-by-step spoiler solutions. Passwords/flags are omitted throughout since they're player-specific and not the point.
