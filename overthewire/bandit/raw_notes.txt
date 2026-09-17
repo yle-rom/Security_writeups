@@ -1,0 +1,178 @@
+Bandit
+
+Note: this is the raw working log kept during the exercise, see README.md for the cleaned-up, grouped writeup.
+
+Connect:
+ssh bandit[]@bandit.labs.overthewire.org -p 2220
+
+File level format:
+bandit[] == bandit[]->bandit[]+1
+
+Commands Covered:
+ls, cd, cat, file, grep, sort, uniq, base64, tr, tar, gzip, bzip2, xxd, mktemp, cp, mv, telnet, ssh, scp, chmod, openssl, nmap, diff, ssh ... [command] [commandargs], nc
+
+bandit0:
+
+bandit1:
+
+bandit2:
+
+bandit3:
+
+bandit4:
+
+bandit5:
+
+bandit6:
+tried find / -size 33c -user bandit7 -group bandit6
+
+bandit7:
+grep "millionth"
+
+bandit8:
+sort data.txt | uniq -u
+
+bandit9:
+strings data.txt | grep "==" | sort -n
+
+bandit10:
+base64 -d data.txt
+
+bandit11:
+tr < data.txt "ABCDEFGHIJKLMNOPQRSTUVWXYZ" "NOPQRSTUVWXYZABCDEFGHIJKLM" | tr "abcdefghijklmnopqrstuvwxyz" "nopqrstuvwxyzabcdefghijklm"
+better approach: tr 'A-Za-z' 'N-ZA-Mn-za-m' < data.txt
+
+bandit12:
+https://mayadevbe.me/posts/overthewire/bandit/level13/
+Concepts: gzip, bzip2, tar, xxd. Had to look at the hexdump using xxd file.
+  first bytes show file type (every file has a unique hex signature https://en.wikipedia.org/wiki/List_of_file_signatures).
+  425a for bzip, 1f8b for gzip, 2nd col 7461 for tar (or .bin on the final col)
+  so decompressing with either gzip or bzip2 you get data, then look with xxd to determine next method.
+  #gzip, bzip, tar need either their extension or bin at the end
+
+bandit13:
+~/ : ls  -> sshkey.private
+exit. then use scp to copy file from bandit13 into my machine.
+scp -P 2220 bandit13@bandit.labs.overthewire.org:sshkey.private
+then using ssh -i sshkey.private ... i tried to login but said permission for key are too open. So had to change permissions so that file is only accessible by me with chmod 700.
+ssh -i sshkey.private bandit14@bandit.labs.overthewire.org -p 2220 then logs in.
+so either connect with the private key or then get the password from /etc/bandit_pass/bandit14 since now i have read access.
+
+bandit14:
+telnet localhost 30000
+enter bandit 14 pswd
+retrieved new one
+
+bandit15:
+openssl s_client -connect localhost:30001
+
+bandit16:
+nmap -sV localhost -p 31000-32000 #which finds open ports and shows their type
+  or use nmap localhost -p 31000-32000 and then openssl s_client manually to find ssl
+
+openssl s_client -connect localhost:31790
+  was gettign keyupdate.
+  echo "bandit 16 password" | openssl s_client -connect localhost:31790
+got back this ssh key, which i then chmod 700 and used ssh -i to connect.
+-----BEGIN RSA PRIVATE KEY-----
+-------END RSA PRIVATE KEY-----
+
+bandit17:
+diff password.old password.new
+
+bandit18:
+ssh bandit18@bandit.labs.overthewire.org -p 2220 cat readme
+
+bandit19:
+./bandit20-do #allows you to run commands as another user(bandit20 in this case)
+./bandit20-do cat /etc/bandit_pass/bandit20
+
+bandit20:
+had to create a server which contains the previous password, then use the binary to get the new.
+echo "0qXahG8ZjOVMN9Ghs7iOWsCfZyXOUbYO" | nc -l -p 9999 &
+./suconnect 9999
+
+bandit21:
+went into /etc/cron.d/ and saw that theres a cronjob_bandit22.sh being executed from /usr/bin
+cat /usr/bin/cronjob_bandit22.sh
+chmod 644 /tmp/[randomStrings]
+cat /etc/bandit_pass/bandit22 > /tmp/[sameRandomStrings]
+cat /tmp/[thatRandomString]
+
+bandit22:
+cat /usr/bin/cronjob_bandit23.sh
+saw the script
+run mytarget=$(echo I am user bandit23 | md5sum | cut -d ' ' -f 1)
+cat /tmp/$mytarget
+
+bandit23:
+mktemp -d
+vim bandit24_pass.sh
+  #!/bin/bash
+  cat /etc/bandit_pass/bandit24 > /tmp/tmp.generated/password
+chmod for folder and 2 files
+cp bandit24_pass.sh > /var/spool/bandit24/foo/bandit24_pass.sh
+wait 1m
+cat password  
+
+bandit24:
+mktemp -d
+script:
+  for i in {0000..9999};
+  echo gb8KRRCsshuZXI0tUuR6ypOFjiZbf3G8 $i >> combinations.txt
+  done
+cat combinations.txt | nc localhost 30002 > results.txt
+
+bandit25:
+sshkey from bandit26.sshkey
+gotten with scp
+
+looking into the /etc/passwd file for bandit26, he has a file in /usr/bin/showtext
+cat /usr/bin/showtext
+  export TERM=linux
+  more ~/text.txt
+  exit 0
+
+what this means is that instead of bash, the default shell opens the text.txt with more and immediately closes.
+so i had to ssh into the server but have the terminal window extremely small, so that more would launch into command mode.
+then v to get into vim mode.
+:e /etc/bandit_pass/bandit26 to get the proper password
+:set shell=/bin/bash and :shell to drop into normal shell
+
+bandit26:
+./bandit27-do cat /etc/bandit_pass/bandit27
+
+bandit27:
+locally in .local/src/gitClones:
+git clone ssh://bandit27-git@bandit.labs.overthewire.org:2220/home/bandit27-git/repom
+
+bandit28:
+locally in .local/src/gitClones:
+git clone ssh://bandit28-git@bandit.labs.overthewire.org:2220/home/bandit28-git/repom
+git log -> showed 3 commits
+git show [commit tag] -> showed the password before adding xxxxxxx over it
+
+bandit29:
+locally in .local/src/gitClones:
+git clone ssh://bandit29-git@bandit.labs.overthewire.org:2220/home/bandit29-git/repom
+git branch -a
+git switch dev
+cat README.md
+
+bandit30:
+cloned the same way as before
+git tag -> shows tags
+git show secret
+
+bandit31:
+git clone
+touch key.txt
+echo ... > key.txt
+git add -f key.txt
+git commit
+git push origin master
+
+bandit32:
+$0 -> breaks out of the shell gimmick
+cd /etc/bandit_pass
+cat bandit33
