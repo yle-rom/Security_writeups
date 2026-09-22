@@ -15,7 +15,8 @@ Methodology-focused notes from hands-on security practice — CTF-style wargames
 - Starting Point — in progress.
 
 ### PortSwigger Web Security Academy
-- Not started (queued after TryHackMe path).
+- [Server-side topics](portswigger/server_side_vulnerabilities/README.md) — complete. Path traversal, access control (vertical/horizontal/IDOR), authentication/2FA bypass, SSRF, file upload, OS command injection, SQL injection.
+- Client-side topics — not started.
 
 ## Note on spoilers
 

